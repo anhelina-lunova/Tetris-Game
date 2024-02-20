@@ -9,7 +9,7 @@
 - УРОК 6: Фінальне заняття. Огляд робіт, фідбек та відповіді на запитання.
 
 Домашні завдання:
-[Day1]()
+[Day1](https://github.com/anhelina-lunova/Tetris-Game/tree/main/Homeworks/Day1)
 
 ---
 
