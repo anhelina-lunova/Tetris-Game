@@ -1,0 +1,44 @@
+/* 2. Стилізувати нові фігури */
+
+.grid{
+    background: #181818;
+    padding: 0.5vh;
+    display: grid;
+    grid-template-columns: repeat(10, auto);
+    gap: 0.5vh;
+}
+
+.grid > div{
+    height: min(4vh, 7vw);
+    width: min(4vh, 7vw);
+    background-color: #1f1f1f;
+    border-radius: 0.3vh;
+}
+
+.grid .I{
+    background-color: cyan;
+}
+
+.grid .O{
+    background-color: yellow;
+}
+
+.grid .T{
+    background-color: purple;
+}
+
+.grid .J{
+    background-color: blue;
+}
+
+.grid .L{
+    background-color: #ff7f00;
+}
+
+.grid .S{
+    background-color: #00ff00;
+}
+
+.grid .Z{
+    background-color: red;
+}
