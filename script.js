@@ -1,12 +1,9 @@
-// 1. Додати нові фігури
-// 2. Стилізувати нові фігури
-// 3. Додати функцію рандому котра буде поветати випадкову фігуру
-// 4. Центрувати фігуру незалежно від ширини
+
 
 
 
 const PLAYFIELD_COLUMNS = 10;
-const PLAYFIELD_ROWS    = 20;
+const PLAYFIELD_ROWS = 20;
 const TETROMINO_NAMES = [
     'I',
     'O',
@@ -15,54 +12,52 @@ const TETROMINO_NAMES = [
     'L',
     'S',
     'Z'
-]
+];
 
 const TETROMINOES = {
     'I': [
-        [0,0,0,0],
-        [1,1,1,1],
-        [0,0,0,0],
-        [0,0,0,0]
+        [0, 0, 0, 0],
+        [1, 1, 1, 1],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0]
     ],
-    'O': [
-        [1,1],
-        [1,1]
-    ],
+    'O': [[1, 1], [1, 1]],
     'T': [
-        [1,1,1],
-        [0,1,0],
-        [0,0,0]
+        [1, 1, 1],
+        [0, 1, 0],
+        [0, 0, 0]
     ],
     'J': [
-        [0,1,0],
-        [0,1,0],
-        [1,1,0]
+        [0, 1, 0],
+        [0, 1, 0],
+        [1, 1, 0]
     ],
     'L': [
-        [0,1,0],
-        [0,1,0],
-        [0,1,1]
+        [0, 1, 0],
+        [0, 1, 0],
+        [0, 1, 1]
     ],
     'S': [
-        [0,1,1],
-        [1,1,0],
-        [0,0,0]
+        [0, 1, 1],
+        [1, 1, 0],
+        [0, 0, 0]
     ],
     'Z': [
-        [1,1,0],
-        [0,1,1],
-        [0,0,0]
+        [1, 1, 0],
+        [0, 1, 1],
+        [0, 0, 0]
     ]
-}
+};
 
-function convertPositionToIndex(row, column){
+function convertPositionToIndex(row, column) {
     return row * PLAYFIELD_COLUMNS + column;
 }
 
 let playfield;
 let tetromino;
 
-function generatePlayField(){
+function generatePlayField() {
+    // 
     for(let i = 0; i < PLAYFIELD_ROWS * PLAYFIELD_COLUMNS; i++){
         const div = document.createElement(`div`);
         document.querySelector('.grid').append(div);
@@ -73,8 +68,8 @@ function generatePlayField(){
     // console.table(playfield);
 }
 
-function generateTetromino(){
-
+function generateTetromino() {
+    // 
     const random = Math.floor(Math.random() * TETROMINO_NAMES.length);
 
     const name = TETROMINO_NAMES[random];
@@ -98,9 +93,11 @@ function generateTetromino(){
 
 generatePlayField();
 generateTetromino();
+
 const cells = document.querySelectorAll('.grid div');
 
-function drawPlayField(){
+function drawPlayField() {
+    // 
     for(let row = 0; row < PLAYFIELD_ROWS; row++){
         for(let column = 0; column < PLAYFIELD_COLUMNS; column++){
             if(playfield[row][column] == 0) continue;
@@ -113,7 +110,8 @@ function drawPlayField(){
     }
 }
 
-function drawTetromino(){
+function drawTetromino() {
+    // 
     const name = tetromino.name;
     const tetrominoMatrixSize = tetromino.matrix.length;
     
@@ -131,10 +129,53 @@ function drawTetromino(){
     }
     // row
 }
+
+// New function for rotating tetrominos:
+function rotateTetromino() {
+    // Create a temporary rotation matrix to perform the rotation
+    const rotatedMatrix = [];
+    for (let col = 0; col < tetromino.matrix[0].length; col++) {
+        rotatedMatrix.push([]);
+        for (let row = tetromino.matrix.length - 1; row >= 0; row--) {
+            rotatedMatrix[col].push(tetromino.matrix[row][col]);
+        }
+    }
+
+    // Check for collisions after rotation
+    let canRotate = true;
+    for (let row = 0; row < rotatedMatrix.length; row++) {
+        for (let col = 0; col < rotatedMatrix[0].length; col++) {
+            if (
+                rotatedMatrix[row][col] === 1 &&
+                (tetromino.row + row >= PLAYFIELD_ROWS ||
+                    tetromino.column + col >= PLAYFIELD_COLUMNS ||
+                    playfield[tetromino.row + row][tetromino.column + col] === 1)
+            ) {
+                canRotate = false;
+                break;
+            }
+        }
+        if (!canRotate) {
+            break;
+        }
+    }
+
+    // If rotation is possible, update the tetromino matrix and position
+    if (canRotate) {
+        tetromino.matrix = rotatedMatrix;
+
+        // Adjust position after rotation to prevent tetromino going off-grid
+        if (tetromino.column + tetromino.matrix[0].length >= PLAYFIELD_COLUMNS) {
+            tetromino.column -= tetromino.matrix[0].length - 1;
+        }
+    }
+}
+
 // drawTetromino();
 // drawPlayField();
 
-function draw(){
+function draw() {
+    // 
     cells.forEach(cell => cell.removeAttribute('class'));
     drawPlayField();
     drawTetromino();
@@ -143,8 +184,10 @@ function draw(){
 draw();
 
 document.addEventListener('keydown', onKeyDown);
-function onKeyDown(e){
-    switch(e.key){
+
+function onKeyDown(e) {
+    switch (e.key) {
+        // 
         case 'ArrowDown':
             moveTetrominoDown();
             break;
@@ -154,18 +197,31 @@ function onKeyDown(e){
         case 'ArrowRight':
             moveTetrominoRight();
             break;
+        case 'ArrowUp':
+            rotateTetromino();
+            break;
     }
 
     draw();
 }
 
-function moveTetrominoDown(){
+function moveTetrominoDown() {
+    // 
     tetromino.row += 1;
 }
-function moveTetrominoLeft(){
+
+function moveTetrominoLeft() {
+    // 
     tetromino.column -= 1;
 }
-function moveTetrominoRight(){
+
+function moveTetrominoRight() {
+    // 
     tetromino.column += 1;
 }
 
+// Add event listener for 'ArrowUp' key press to rotate tetromino
+document.addEventListener('keydown', onKeyDown);
+
+// Start the game loop
+setInterval(draw, 1000);
