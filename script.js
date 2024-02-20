@@ -75,7 +75,9 @@ function generatePlayField(){
 
 function generateTetromino(){
 
-    const name = TETROMINO_NAMES[1];
+    const random = Math.floor(Math.random() * TETROMINO_NAMES.length);
+
+    const name = TETROMINO_NAMES[random];
     const matrix = TETROMINOES[name];
     // console.log(matrix);
     tetromino = {
