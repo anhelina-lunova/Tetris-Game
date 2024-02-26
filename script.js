@@ -65,6 +65,20 @@ let playfield;
 let tetromino;
 let score = 0;
 
+const MOVE_DOWN_INTERVAL = 1000; // in milliseconds
+let moveDownIntervalId;
+
+function startAutoMoveDown() {
+    moveDownIntervalId = setInterval(() => {
+        moveTetrominoDown();
+        draw();
+    }, MOVE_DOWN_INTERVAL);
+}
+
+function stopAutoMoveDown() {
+    clearInterval(moveDownIntervalId);
+}
+
 function generatePlayField(){
     for(let i = 0; i < PLAYFIELD_ROWS * PLAYFIELD_COLUMNS; i++){
         const div = document.createElement(`div`);
@@ -145,6 +159,7 @@ function placeTetromino(){
 
 generatePlayField();
 generateTetromino();
+startAutoMoveDown();
 const cells = document.querySelectorAll('.grid div');
 
 function drawPlayField(){
@@ -295,3 +310,4 @@ function hasCollisions(row, column){
     return tetromino.matrix[row][column] &&
            playfield[tetromino.row + row][tetromino.column + column];
 }
+
