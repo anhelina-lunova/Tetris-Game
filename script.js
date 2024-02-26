@@ -12,15 +12,7 @@
 
 const PLAYFIELD_COLUMNS = 10;
 const PLAYFIELD_ROWS    = 20;
-const TETROMINO_NAMES = [
-    'I',
-    'O',
-    'T',
-    'J',
-    'L',
-    'S',
-    'Z'
-]
+const TETROMINO_NAMES = ['I', 'O', 'T', 'J', 'L', 'S', 'Z']
 
 const TETROMINOES = {
     'I': [
@@ -71,6 +63,7 @@ function getRandomElement(array){
 
 let playfield;
 let tetromino;
+let score = 0;
 
 function generatePlayField(){
     for(let i = 0; i < PLAYFIELD_ROWS * PLAYFIELD_COLUMNS; i++){
@@ -83,8 +76,42 @@ function generatePlayField(){
     // console.table(playfield);
 }
 
-function generateTetromino(){
+//
+//
+//
+function removeFullRows() {
+    let rowsCleared = 0;
 
+    for (let row = 0; row < PLAYFIELD_ROWS; row++) {
+        if (playfield[row].every(cell => cell !== 0)) {
+            playfield.splice(row, 1);
+            playfield.unshift(new Array(PLAYFIELD_COLUMNS).fill(0));
+            rowsCleared++;
+        }
+    }
+
+    switch (rowsCleared) {
+        case 1:
+            score += 10;
+            break;
+        case 2:
+            score += 30;
+            break;
+        case 3:
+            score += 50;
+            break;
+        case 4:
+            score += 100;
+            break;
+    }
+
+    document.getElementById('score').innerText = score;
+}
+//
+//
+//
+
+function generateTetromino(){
     const name = getRandomElement(TETROMINO_NAMES);
     const matrix = TETROMINOES[name];
 
@@ -112,6 +139,7 @@ function placeTetromino(){
             }
         }
     }
+    removeFullRows();
     generateTetromino();
 }
 

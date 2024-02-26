@@ -11,12 +11,30 @@ body{
     align-items: center;
 }
 
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+}
+
+.score {
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    position: sticky;
+    top: 0;
+}
+
 .grid{
     background: #181818;
     padding: 0.5vh;
     display: grid;
     grid-template-columns: repeat(10, auto);
     gap: 0.5vh;
+    margin-top: 1rem; /* відступ від поля з грою */
 }
 
 .grid > div{
