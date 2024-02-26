@@ -10,6 +10,7 @@
 
 Домашні завдання:
 [Day1](https://github.com/anhelina-lunova/Tetris-Game/tree/main/Homeworks/Day1)
+[Day3](https://github.com/anhelina-lunova/Tetris-Game/tree/main/Homeworks/Day3)
 
 ---
 
