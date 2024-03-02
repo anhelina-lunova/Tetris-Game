@@ -6,7 +6,7 @@
 - [УРОК 3](https://www.youtube.com/watch?v=c0Cj6YhSFqQ): Програмуємо логіку гри. Логіка обертання фігур, розрахунок балів, реалізація фігур. Підготовка наступного д/з.
 - [УРОК 4](https://youtu.be/_9Jsc7r3C2w?si=863-D870wW2GsQTg&t=854): Розбір д/з та відповіді на питання. [ДЗ](https://www.youtube.com/watch?v=9yvjwjPNmKA)
 - [УРОК 5.1](https://www.youtube.com/watch?v=TOJ_KMvO-Oo) [, 5.2](https://www.youtube.com/watch?v=foxnNNwZyi4): Механіка гри. Створення паузи, падіння фігур після пробілу, оновлення гри та оптимізація коду.
-- УРОК 6: Фінальне заняття. Огляд робіт, фідбек та відповіді на запитання.
+- [УРОК 6](https://www.youtube.com/watch?v=dlQB4xeXqyU): Фінальне заняття. Огляд робіт, фідбек та відповіді на запитання.
 
 Домашні завдання:
 - [Day1](https://github.com/anhelina-lunova/Tetris-Game/tree/main/Homeworks/Day1)
