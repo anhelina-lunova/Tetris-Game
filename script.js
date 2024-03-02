@@ -13,7 +13,6 @@
 const PLAYFIELD_COLUMNS = 10;
 const PLAYFIELD_ROWS    = 20;
 const TETROMINO_NAMES = ['I', 'O', 'T', 'J', 'L', 'S', 'Z']
-
 const TETROMINOES = {
     'I': [
         [0,0,0,0],
@@ -51,6 +50,13 @@ const TETROMINOES = {
         [0,0,0]
     ]
 }
+const MOVE_DOWN_INTERVAL = 1000; // in milliseconds
+
+let playfield;
+let tetromino;
+let score = 0;
+let moveDownIntervalId = null;
+let deletedRowsCount = 0;
 
 function convertPositionToIndex(row, column){
     return row * PLAYFIELD_COLUMNS + column;
@@ -59,24 +65,6 @@ function convertPositionToIndex(row, column){
 function getRandomElement(array){
     const randomIndex = Math.floor(Math.random() * array.length)
     return array[randomIndex]
-}
-
-let playfield;
-let tetromino;
-let score = 0;
-
-const MOVE_DOWN_INTERVAL = 1000; // in milliseconds
-let moveDownIntervalId;
-
-function startAutoMoveDown() {
-    moveDownIntervalId = setInterval(() => {
-        moveTetrominoDown();
-        draw();
-    }, MOVE_DOWN_INTERVAL);
-}
-
-function stopAutoMoveDown() {
-    clearInterval(moveDownIntervalId);
 }
 
 function generatePlayField(){
@@ -101,6 +89,7 @@ function removeFullRows() {
             playfield.splice(row, 1);
             playfield.unshift(new Array(PLAYFIELD_COLUMNS).fill(0));
             rowsCleared++;
+            deletedRowsCount++;
         }
     }
 
@@ -120,6 +109,8 @@ function removeFullRows() {
     }
 
     document.getElementById('score').innerText = score;
+    document.getElementById('lines').innerText = deletedRowsCount;
+
 }
 //
 //
@@ -129,7 +120,7 @@ function generateTetromino(){
     const name = getRandomElement(TETROMINO_NAMES);
     const matrix = TETROMINOES[name];
 
-    const row = name === 'I' ? -1 : 0;
+    const row = ['J', 'L', ].includes(name) ? -3 : -2;
     const column =
     ['T', 'J', 'S'].includes(name)  // T - ?
     ? PLAYFIELD_COLUMNS / 2 - Math.floor(matrix.length / 2)
@@ -189,6 +180,7 @@ function drawTetromino(){
             // );
             // cells[cellIndex].innerHTML = showRotated[row][column];
             // --------------
+            if(isOutsideOfTopboard(row)) continue;
             if(!tetromino.matrix[row][column]) continue;
             const cellIndex = convertPositionToIndex(
                 tetromino.row + row,
@@ -285,6 +277,17 @@ function moveTetrominoRight(){
     }
 }
 
+function startAutoMoveDown() {
+    moveDownIntervalId = setInterval(() => {
+        moveTetrominoDown();
+        draw();
+    }, MOVE_DOWN_INTERVAL);
+}
+
+function stopAutoMoveDown() {
+    clearInterval(moveDownIntervalId);
+}
+
 function isValid(){
     const matrixSize = tetromino.matrix.length;
     for(let row = 0; row < matrixSize; row++){
@@ -297,17 +300,21 @@ function isValid(){
     return true;
 }
 
+function isOutsideOfTopboard(row){
+    return tetromino.row + row < 0;
+}
+
 function isOutsideOfGameboard(row, column){
     return tetromino.matrix[row][column] &&
     (      
-           tetromino.column + column < 0 ||
-           tetromino.column + column >= PLAYFIELD_COLUMNS ||
-           tetromino.row + row >= PLAYFIELD_ROWS
+        tetromino.column + column < 0 ||
+        tetromino.column + column >= PLAYFIELD_COLUMNS ||
+        tetromino.row + row >= PLAYFIELD_ROWS
     );
 }
 
 function hasCollisions(row, column){
     return tetromino.matrix[row][column] &&
-           playfield[tetromino.row + row][tetromino.column + column];
+           playfield[tetromino.row + row]?.[tetromino.column + column];
 }
 
