@@ -57,6 +57,8 @@ const TETROMINOES        = {
     ]
 }
 
+const gridElement = document.querySelector('.grid');
+
 const overlay            = document.querySelector('.overlay');
 const controlers         = document.querySelector('.controlers');
 const btnLeft            = document.querySelector('.btn-left');
@@ -64,18 +66,23 @@ const btnDown            = document.querySelector('.btn-down');
 const btnRight           = document.querySelector('.btn-right');
 const btnDrop            = document.querySelector('.btn-drop');
 const btnRotate          = document.querySelector('.btn-rotate');
-const btnRestart         = document.querySelector('.btn-restart');
+const btnRestart         = document.querySelectorAll('.btn-restart');
 const btnPlay            = document.querySelector('.btn-play');
 const btnPause           = document.querySelector('.btn-pause');
-const scoreElement       = document.getElementById('score');
+const speedElement       = document.getElementById('speed');
 const linesElement       = document.getElementById('lines');
+const scoreElement       = document.getElementById('score');
+const hiScoreElement     = document.getElementById('hi-score');
+const timeElement        = document.getElementById('time');
+
 
 let isPaused             = false;
 let isGameOver           = false;
+let moveDownIntervalId   = null;
 let moveDownInterval     = 1000; // milliseconds
 let score                = 0;
 let deletedRowsCount     = 0;
-let moveDownIntervalId   = null;
+
 let playfield;
 let tetromino;
 let cells;
@@ -89,16 +96,34 @@ function init(){
     linesElement.innerHTML = 0;
     isGameOver = false;
     generatePlayField();
-    generateTetromino();
-    cells = document.querySelectorAll('.grid div');
+    generateTetromino(); 
+    cells = Array.from({ length: PLAYFIELD_ROWS * PLAYFIELD_COLUMNS }, () => document.createElement('div'));
+    cells.forEach(cell => gridElement.appendChild(cell));
     startAutoMoveDown();
 }
 
-btnRestart.addEventListener('click', function(){
-    document.querySelector('.grid').innerHTML = '';
-    overlay.style.display = 'none';
-    init();
-})
+function generatePlayField(){
+    playfield = Array.from({ length: PLAYFIELD_ROWS }, () => Array(PLAYFIELD_COLUMNS).fill(0));
+}
+
+function generateTetromino(){
+    const name = getRandomElement(TETROMINO_NAMES);
+    const matrix = TETROMINOES[name];
+
+    const row = ['J', 'L'].includes(name) ? -3 : -2;
+    const column =
+    ['T', 'J', 'S'].includes(name)  // T - ?
+    ? PLAYFIELD_COLUMNS / 2 - Math.floor(matrix.length / 2)
+    : PLAYFIELD_COLUMNS / 2 - Math.ceil(matrix.length / 2);
+
+    // console.log(matrix);
+    tetromino = {
+        name,
+        matrix,
+        row,
+        column,
+    }
+}
 
 function convertPositionToIndex(row, column){
     return row * PLAYFIELD_COLUMNS + column;
@@ -109,20 +134,6 @@ function getRandomElement(array){
     return array[randomIndex]
 }
 
-function generatePlayField(){
-    for(let i = 0; i < PLAYFIELD_ROWS * PLAYFIELD_COLUMNS; i++){
-        const div = document.createElement(`div`);
-        document.querySelector('.grid').append(div);
-    }
-
-    playfield = new Array(PLAYFIELD_ROWS).fill()
-                    .map( ()=> new Array(PLAYFIELD_COLUMNS).fill(0) )
-    // console.table(playfield);
-}
-
-//
-//
-//
 function removeFullRows() {
     let rowsCleared = 0;
 
@@ -150,31 +161,9 @@ function removeFullRows() {
             break;
     }
 
-    document.getElementById('score').innerHTML = score;
-    document.getElementById('lines').innerHTML = deletedRowsCount;
+    scoreElement.innerHTML = `${score}`;
+    linesElement.innerHTML = `${deletedRowsCount}`;
 
-}
-//
-//
-//
-
-function generateTetromino(){
-    const name = getRandomElement(TETROMINO_NAMES);
-    const matrix = TETROMINOES[name];
-
-    const row = ['J', 'L', ].includes(name) ? -3 : -2;
-    const column =
-    ['T', 'J', 'S'].includes(name)  // T - ?
-    ? PLAYFIELD_COLUMNS / 2 - Math.floor(matrix.length / 2)
-    : PLAYFIELD_COLUMNS / 2 - Math.ceil(matrix.length / 2);
-
-    // console.log(matrix);
-    tetromino = {
-        name,
-        matrix,
-        row,
-        column,
-    }
 }
 
 function placeTetromino(){
@@ -194,70 +183,37 @@ function placeTetromino(){
     generateTetromino();
 }
 
-function drawPlayField(){
-    for(let row = 0; row < PLAYFIELD_ROWS; row++){
-        for(let column = 0; column < PLAYFIELD_COLUMNS; column++){
-            if(playfield[row][column] == 0) continue;
-            
-            const name = playfield[row][column];
-            const cellIndex = convertPositionToIndex(row,column);
-            // console.log(cellIndex);
-            cells[cellIndex].classList.add(name);
-        }
-    }
+function drawPlayField() {
+    playfield.forEach((row, rowIndex) => {
+        row.forEach((cell, columnIndex) => {
+            if (cell == 0) {
+                cells[rowIndex * PLAYFIELD_COLUMNS + columnIndex].className = '';
+            } else {
+                cells[rowIndex * PLAYFIELD_COLUMNS + columnIndex].className = cell;
+            }
+        });
+    });
 }
 
 function drawTetromino(){
     const name = tetromino.name;
     const tetrominoMatrixSize = tetromino.matrix.length;
     
-    for(let row = 0; row < tetrominoMatrixSize; row++){
-        for(let column = 0; column < tetrominoMatrixSize; column++){
-            // Щоб подивитися результат алгоритму з функції rotateMatrix() !!!!
-
-            // const cellIndex = convertPositionToIndex(
-            //     tetromino.row + row,
-            //     tetromino.column + column
-            // );
-            // cells[cellIndex].innerHTML = showRotated[row][column];
-            // --------------
-            if(isOutsideOfTopboard(row)) continue;
-            if(!tetromino.matrix[row][column]) continue;
-            const cellIndex = convertPositionToIndex(
-                tetromino.row + row,
-                tetromino.column + column
-            );
-            // console.log(cellIndex);
-            cells[cellIndex].classList.add(name);
-        }
-        // column
-    }
-    // row
+    tetromino.matrix.forEach((row, rowIndex) => {
+        row.forEach((cell, columnIndex) => {
+            if (isOutsideOfTopboard(rowIndex)) return;
+            if (!cell) return;
+            cells[(tetromino.row + rowIndex) * PLAYFIELD_COLUMNS + (tetromino.column + columnIndex)].className = name;
+        });
+    });
 }
 // drawTetromino();
 // drawPlayField();
 
 function draw(){
-    cells.forEach(cell => cell.removeAttribute('class'));
     drawPlayField();
     drawTetromino();
 }
-
-function rotateTetromino(){
-    const oldMatrix = tetromino.matrix;
-    const rotatedMatrix = rotateMatrix(tetromino.matrix);
-    // showRotated = rotateMatrix(showRotated);
-    tetromino.matrix = rotatedMatrix;
-    if(!isValid()){
-        tetromino.matrix = oldMatrix;
-    }
-}
-
-// let showRotated = [
-//     [1, 2, 3],
-//     [4, 5, 6],
-//     [7, 8, 9]
-// ]
 
 draw();
 
@@ -267,6 +223,7 @@ function rotate(){
 }
 
 document.addEventListener('keydown', onKeyDown);
+
 function onKeyDown(e){
     if(e.key == 'Escape'){
         togglePauseGame();
@@ -293,13 +250,6 @@ function onKeyDown(e){
     draw();
 }
 
-function dropTetrominoDown(){
-    while(isValid()){
-        tetromino.row++;
-    }
-    tetromino.row--;
-}
-
 function rotateMatrix(matrixTetromino){
     const N = matrixTetromino.length;
     const rotateMatrix = [];
@@ -312,57 +262,137 @@ function rotateMatrix(matrixTetromino){
     return rotateMatrix;
 }
 
+document.getElementById("pauseModal").addEventListener("click", function() {
+    if (isPaused && !isGameOver) {
+        togglePauseGame();
+    }
+});
+
+document.addEventListener("visibilitychange", function() {
+    if (document.visibilityState === 'hidden') {
+        if (!isPaused && !isGameOver) {
+            togglePauseGame();
+        }
+    }
+});
+
+btnLeft.addEventListener('click', moveTetrominoLeft);
+btnDown.addEventListener('click', moveTetrominoDown);
+btnRight.addEventListener('click', moveTetrominoRight);
+btnDrop.addEventListener('click', dropTetrominoDown);
+btnRotate.addEventListener('click', rotateTetromino);
+btnRestart.forEach(button => {
+    button.addEventListener('click', function() {
+        document.querySelector('.grid').innerHTML = '';
+        overlay.style.display = 'none';
+        init();
+        this.blur();
+    });
+});
+btnPause.addEventListener('click', togglePauseGame);
+
+function moveTetrominoLeft(){
+    if(isPaused){
+        return null;
+    }
+    tetromino.column -= 1;
+    if(!isValid()){
+        tetromino.column += 1;
+    }
+    draw();
+    this.blur();
+}
+
 function moveTetrominoDown(){
+    if(isPaused){
+        return null;
+    }
     tetromino.row += 1;
     if(!isValid()){
         tetromino.row -= 1;
         placeTetromino();
     }
+    draw();
+    this.blur();
 }
-function moveTetrominoLeft(){
-    tetromino.column -= 1;
-    if(!isValid()){
-        tetromino.column += 1;
-    }
-}
+
 function moveTetrominoRight(){
+    if(isPaused){
+        return null;
+    }
     tetromino.column += 1;
     if(!isValid()){
         tetromino.column -= 1;
     }
+    draw();
+    this.blur();
 }
 
-function gameOver(){
-    stopAutoMoveDown();
-    overlay.style.display = 'flex';
+function dropTetrominoDown(){
+    if(isPaused){
+        return null;
+    }
+    while(isValid()){
+        tetromino.row++;
+    }
+    tetromino.row--;
+
+    this.blur();
+}
+
+function rotateTetromino(){
+    if(isPaused){
+        return null;
+    }
+    const oldMatrix = tetromino.matrix;
+    const rotatedMatrix = rotateMatrix(tetromino.matrix);
+    // showRotated = rotateMatrix(showRotated);
+    tetromino.matrix = rotatedMatrix;
+    if(!isValid()){
+        tetromino.matrix = oldMatrix;
+    }
+    draw();
+    this.blur();
+}
+
+// let showRotated = [
+//     [1, 2, 3],
+//     [4, 5, 6],
+//     [7, 8, 9]
+// ]
+
+function togglePauseGame(){
+    if(isPaused === false){
+        stopAutoMoveDown();
+        document.getElementById("pauseModal").style.display = 'block'; // Відображення модального вікна
+    } else {
+        startAutoMoveDown();
+        document.getElementById("pauseModal").style.display = 'none'; // Приховання модального вікна
+    }
+    isPaused = !isPaused;
+    this.blur();
 }
 
 function startAutoMoveDown() {
     if(!moveDownIntervalId){
         moveDownIntervalId = setInterval(() => {
-        moveTetrominoDown();
-        draw();
-        if(isGameOver){
-            gameOver();
-        }
+            moveTetrominoDown();
+            draw();
+            if(isGameOver){
+                gameOver();
+            }
         }, moveDownInterval);
     }
 }
 
 function stopAutoMoveDown() {
     clearInterval(moveDownIntervalId);
-
     moveDownIntervalId = null;
 }
 
-
-function togglePauseGame(){
-    if(isPaused === false){
-        stopAutoMoveDown();
-    } else {
-        startAutoMoveDown();
-    }
-    isPaused = !isPaused;
+function gameOver(){
+    stopAutoMoveDown();
+    overlay.style.display = 'flex';
 }
 
 function isValid(){
@@ -394,4 +424,3 @@ function hasCollisions(row, column){
     return tetromino.matrix[row][column] &&
            playfield[tetromino.row + row]?.[tetromino.column + column];
 }
-

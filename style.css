@@ -56,7 +56,7 @@ body{
 .overlay > .btn-restart{
     font-size: 32px;
     width: 100%;
-    height: 60px;
+    height: 120px;
     background: linear-gradient(320deg, #91c7b1, #b33951);
     border-radius: 20px;
     border: 4px solid #666666;
@@ -106,4 +106,27 @@ body{
 
 .grid .Z{
     background-color: red;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: hsla(0, 0%, 0%, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    font-size: 20px;
+    border: 1px solid #666666;
+    margin: 1rem;
+    padding: 2rem;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    text-align: center;
+    user-select: none;
 }
