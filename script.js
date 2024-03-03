@@ -56,10 +56,20 @@ const TETROMINOES        = {
         [0,0,0]
     ]
 }
+
+const overlay            = document.querySelector('.overlay');
+const controlers         = document.querySelector('.controlers');
+const btnLeft            = document.querySelector('.btn-left');
+const btnDown            = document.querySelector('.btn-down');
+const btnRight           = document.querySelector('.btn-right');
+const btnDrop            = document.querySelector('.btn-drop');
+const btnRotate          = document.querySelector('.btn-rotate');
 const btnRestart         = document.querySelector('.btn-restart');
+const btnPlay            = document.querySelector('.btn-play');
+const btnPause           = document.querySelector('.btn-pause');
 const scoreElement       = document.getElementById('score');
 const linesElement       = document.getElementById('lines');
-const overlay            = document.querySelector('.overlay');
+
 let isPaused             = false;
 let isGameOver           = false;
 let moveDownInterval     = 1000; // milliseconds
