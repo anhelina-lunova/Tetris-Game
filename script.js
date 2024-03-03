@@ -19,45 +19,17 @@
 const PLAYFIELD_COLUMNS  = 10;
 const PLAYFIELD_ROWS     = 20;
 const TETROMINO_NAMES    = ['I', 'O', 'T', 'J', 'L', 'S', 'Z']
-const TETROMINOES        = {
-    'I': [
-        [0,0,0,0],
-        [1,1,1,1],
-        [0,0,0,0],
-        [0,0,0,0]
-    ],
-    'O': [
-        [1,1],
-        [1,1]
-    ],
-    'T': [
-        [1,1,1],
-        [0,1,0],
-        [0,0,0]
-    ],
-    'J': [
-        [0,1,0],
-        [0,1,0],
-        [1,1,0]
-    ],
-    'L': [
-        [0,1,0],
-        [0,1,0],
-        [0,1,1]
-    ],
-    'S': [
-        [0,1,1],
-        [1,1,0],
-        [0,0,0]
-    ],
-    'Z': [
-        [1,1,0],
-        [0,1,1],
-        [0,0,0]
-    ]
-}
+const TETROMINOES = {
+    'I': [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
+    'O': [[1,1],[1,1]],
+    'T': [[1,1,1],[0,1,0],[0,0,0]],
+    'J': [[0,1,0],[0,1,0],[1,1,0]],
+    'L': [[0,1,0],[0,1,0],[0,1,1]],
+    'S': [[0,1,1],[1,1,0],[0,0,0]],
+    'Z': [[1,1,0],[0,1,1],[0,0,0]]
+};
 
-const gridElement = document.querySelector('.grid');
+const gridElement        = document.querySelector('.grid');
 
 const overlay            = document.querySelector('.overlay');
 const controlers         = document.querySelector('.controlers');
@@ -75,11 +47,10 @@ const scoreElement       = document.getElementById('score');
 const hiScoreElement     = document.getElementById('hi-score');
 const timeElement        = document.getElementById('time');
 
-
 let isPaused             = false;
 let isGameOver           = false;
 let moveDownIntervalId   = null;
-let moveDownInterval     = 1000; // milliseconds
+let moveDownSpeed        = 1000; // milliseconds
 let score                = 0;
 let deletedRowsCount     = 0;
 
@@ -311,6 +282,7 @@ function moveTetrominoDown(){
     if(!isValid()){
         tetromino.row -= 1;
         placeTetromino();
+        updateSpeed();
     }
     draw();
     this.blur();
@@ -377,11 +349,12 @@ function startAutoMoveDown() {
     if(!moveDownIntervalId){
         moveDownIntervalId = setInterval(() => {
             moveTetrominoDown();
+            updateSpeed();
             draw();
             if(isGameOver){
                 gameOver();
             }
-        }, moveDownInterval);
+        }, moveDownSpeed);
     }
 }
 
@@ -423,4 +396,16 @@ function isOutsideOfGameboard(row, column){
 function hasCollisions(row, column){
     return tetromino.matrix[row][column] &&
            playfield[tetromino.row + row]?.[tetromino.column + column];
+}
+
+function updateSpeed() {
+    const pointsPerSpeedIncrease = 100;
+    const speedIncreaseAmount = 1000;
+
+    const currentSpeedElement = parseInt(speedElement.innerHTML);
+    const currentScore = parseInt(scoreElement.innerHTML);
+
+    if (currentScore >= pointsPerSpeedIncrease * currentSpeedElement) {
+        speedElement.innerHTML = currentSpeedElement + 1;
+    }
 }
