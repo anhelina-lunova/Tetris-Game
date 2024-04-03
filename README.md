@@ -15,4 +15,5 @@
 
 ---
 
-Result: https://anhelina-lunova.github.io/Tetris-Game/
+Результат: https://anhelina-lunova.github.io/Tetris-Game/
+Досягнення: посіла 3-тє місце за версією ментора серед 20+ учасників, що дійшли до кінця - [фотопруф](https://www.linkedin.com/feed/update/urn:li:activity:7176461025016213505/)
